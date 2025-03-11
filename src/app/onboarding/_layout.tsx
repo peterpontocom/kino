@@ -11,7 +11,7 @@ export default function Layout() {
   }
 
   return (
-    <SafeAreaView className="flex-1 justify-between p-4">
+    <SafeAreaView className="flex-1 justify-between bg-white p-4">
       <Image source={require("../../assets/icons/kino-logo.png")} />
       <Slides />
       <View className="mb-16 gap-2">
