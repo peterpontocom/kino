@@ -24,7 +24,7 @@ export function CardProduct({
       </View>
       <Text className="Text-sm font-medium">{title}</Text>
       <View className="flex-row items-center justify-between">
-        <Text className="text-xl font-semibold">{price}</Text>
+        <Text className="text-xl font-semibold">{price},00 KZS</Text>
         <Text className="text-xs">{validation}</Text>
       </View>
       <Button title="Adicionar" />

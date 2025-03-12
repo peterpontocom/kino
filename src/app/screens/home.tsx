@@ -7,7 +7,7 @@ import { products } from "../../constants/products";
 export default function Home() {
   return (
     <>
-      {/* <AdSlider /> */}
+      <AdSlider />
       <View>
         <ScrollView
           horizontal
