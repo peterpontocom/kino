@@ -1,39 +1,36 @@
-import { bannerData } from "@/constants/ad-banner";
-import { Link } from "expo-router";
-import { Text, View, Image } from "react-native";
-import AppIntroSlider from "react-native-app-intro-slider";
+import { FlatList, ScrollView, View } from "react-native";
+import { AdSlider } from "./components/ad-slider";
+import { FilterButton } from "./components/filter-button";
+import { CardProduct } from "../../components/ui/card-product";
+import { products } from "../../constants/products";
 
-export default function Component() {
+export default function Home() {
   return (
-    <AppIntroSlider
-      data={bannerData}
-      renderItem={({ item }) => {
-        return (
-          <View className="relative">
-            <Image
-              source={item.image}
-              className="w-full rounded-lg object-contain"
+    <>
+      {/* <AdSlider /> */}
+      <View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          className="flex-row gap-2 overflow-auto"
+        >
+          <FilterButton />
+        </ScrollView>
+        <FlatList
+          className="mt-3 grid grid-cols-2 gap-2"
+          numColumns={2}
+          showsHorizontalScrollIndicator={false}
+          data={products}
+          renderItem={(product) => (
+            <CardProduct
+              imageUrl={product.item.imageUrl}
+              price={product.item.price}
+              title={product.item.title}
+              validation={product.item.validation}
             />
-            <Link
-              href={"/"}
-              className="absolute bottom-3 left-6 rounded-full border border-black bg-zinc-50 p-3.5 py-2.5 text-sm font-semibold text-black"
-            >
-              Realizar pedido
-            </Link>
-          </View>
-        );
-      }}
-      activeDotStyle={{ backgroundColor: "#F77C00", display: "none" }}
-      showNextButton={false}
-      showDoneButton={false}
-      dotStyle={{
-        backgroundColor: "transparent",
-        borderWidth: 1,
-        borderColor: "#F77C00",
-        width: 10,
-        height: 10,
-        display: "none",
-      }}
-    />
+          )}
+        />
+      </View>
+    </>
   );
 }
