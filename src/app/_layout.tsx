@@ -22,25 +22,25 @@ function MainLayout() {
 
       if (session) {
         setAuth(session.user);
-        router.replace("/screens/home/home");
+        router.replace("/screens/(main)");
         return;
       }
       setAuth(null);
-      router.replace("/screens/auth/signin");
+      router.replace("/screens/(auth)/signin");
     });
   }, []);
   return (
     <Stack>
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen
-        name="screens/auth/signin"
+        name="screens/(auth)/signin"
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name="screens/auth/signup"
+        name="screens/(auth)/signup"
         options={{ headerShown: false }}
       />
-      <Stack.Screen name="screens/home/home" options={{ headerShown: false }} />
+      <Stack.Screen name="screens/(main)" options={{ headerShown: false }} />
     </Stack>
   );
 }
