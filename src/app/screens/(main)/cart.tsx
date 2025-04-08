@@ -1,6 +1,6 @@
 import { Text, View } from "react-native";
 
-export default function Chart() {
+export default function Cart() {
   return (
     <View>
       <Text>Carrinho</Text>

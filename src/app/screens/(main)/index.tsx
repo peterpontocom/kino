@@ -1,3 +1,4 @@
+import { CardProduct } from "@/src/components/layout/card-product";
 import { Header } from "@/src/components/layout/header";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -52,7 +53,7 @@ export default function Home() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-white px-6 py-4">
+    <SafeAreaView className="flex-1 bg-zinc-50 px-6 py-4">
       <Header />
       <Text className="mb-2 mt-3 text-xl font-medium">
         Olá,{" "}
@@ -61,6 +62,11 @@ export default function Home() {
         </Text>
       </Text>
       <Input placeholder="O que vamos comer hoje?" />
+
+      {/***************************************************************** */}
+      <View className="mt-4 gap-2">
+        <CardProduct />
+      </View>
     </SafeAreaView>
   );
 }
