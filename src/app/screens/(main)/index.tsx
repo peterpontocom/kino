@@ -4,6 +4,7 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { useAuth } from "@/src/contexts/auth-context";
 import { supabase } from "@/src/lib/supabase";
+import { Link } from "expo-router";
 import { useEffect, useState } from "react";
 import { View, Text, Alert, SafeAreaView } from "react-native";
 
@@ -66,6 +67,7 @@ export default function Home() {
       {/***************************************************************** */}
       <View className="mt-4 gap-2">
         <CardProduct />
+        <Link href={"/screens/(detail)"}>Detalhe</Link>
       </View>
     </SafeAreaView>
   );
