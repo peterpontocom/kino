@@ -4,9 +4,28 @@ import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
 import { useAuth } from "@/src/contexts/auth-context";
 import { supabase } from "@/src/lib/supabase";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, Text, Alert, SafeAreaView, Image, FlatList } from "react-native";
+import {
+  View,
+  Text,
+  Alert,
+  SafeAreaView,
+  Image,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
+
+export interface ProductProps {
+  id: string;
+  product_name: string;
+  prep_time: string;
+  description: string;
+  image_url: string;
+  category: string;
+  vendors: { name: string }[] | null;
+  price: number;
+}
 
 export default function Home() {
   const { setAuth, user } = useAuth();
@@ -55,16 +74,6 @@ export default function Home() {
 
   // --
 
-  interface ProductProps {
-    id: string;
-    product_name: string;
-    prep_time: string;
-    description: string;
-    image_url: string;
-    category: string;
-    vendors: { name: string }[] | null;
-  }
-
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<ProductProps[]>([]);
 
@@ -81,6 +90,7 @@ export default function Home() {
           description,
           image_url,
           category,
+          price,
           vendors (name)
         `);
 
@@ -128,14 +138,17 @@ export default function Home() {
         <FlatList
           data={products}
           renderItem={({ item }) => (
-            <View className="mb-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-              <Image source={{ uri: item.image_url }} />
-              <Text>{item.product_name}</Text>
-              {/* <Text>Store: {item.vendors[0]?.name}</Text> */}
-              <Text>Category {item.category}</Text>
-              <Text>Prep Time: {item.prep_time} min</Text>
-              <Text>{item.description}</Text>
-            </View>
+            <TouchableOpacity
+              onPress={() => router.push(`/screens/(detail)/${item.id}`)}
+            >
+              <CardProduct
+                id={item.id}
+                image_url={item.image_url}
+                prep_time={item.prep_time}
+                product_name={item.product_name}
+                price={item.price.toString()}
+              />
+            </TouchableOpacity>
           )}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}

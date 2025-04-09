@@ -42,7 +42,7 @@ function MainLayout() {
       />
       <Stack.Screen name="screens/(main)" options={{ headerShown: false }} />
       <Stack.Screen
-        name="screens/(detail)/index"
+        name="screens/(detail)/[id]"
         options={{ headerShown: true, title: "Sobre o producto" }}
       />
     </Stack>
