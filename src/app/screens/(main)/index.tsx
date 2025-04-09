@@ -6,7 +6,7 @@ import { useAuth } from "@/src/contexts/auth-context";
 import { supabase } from "@/src/lib/supabase";
 import { Link } from "expo-router";
 import { useEffect, useState } from "react";
-import { View, Text, Alert, SafeAreaView } from "react-native";
+import { View, Text, Alert, SafeAreaView, Image, FlatList } from "react-native";
 
 export default function Home() {
   const { setAuth, user } = useAuth();
@@ -53,6 +53,64 @@ export default function Home() {
     return names[0];
   }
 
+  // --
+
+  interface ProductProps {
+    id: string;
+    product_name: string;
+    prep_time: string;
+    description: string;
+    image_url: string;
+    category: string;
+    vendors: { name: string }[] | null;
+  }
+
+  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<ProductProps[]>([]);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.from<"products", ProductProps>(
+        "products",
+      ) // Adiciona a tipagem explícita
+        .select(`
+          id,
+          product_name,
+          prep_time,
+          description,
+          image_url,
+          category,
+          vendors (name)
+        `);
+
+      if (error) {
+        throw error; // Lança o erro para ser tratado no catch
+      }
+
+      if (data) {
+        setProducts(data); // Define os produtos apenas se data não for null
+      } else {
+        setProducts([]); // Garante que products não será undefined
+      }
+
+      console.log(data);
+    } catch (error) {
+      Alert.alert("Erro ao buscar produtos.");
+      console.log(error);
+    } finally {
+      setLoading(false); // Garante que o loading será atualizado
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
+  // const renderItem = ({ item }: { item: ProductProps }) => (
+
+  // );
+
   return (
     <SafeAreaView className="flex-1 bg-zinc-50 px-6 py-4">
       <Header />
@@ -64,11 +122,26 @@ export default function Home() {
       </Text>
       <Input placeholder="O que vamos comer hoje?" />
 
-      {/***************************************************************** */}
-      <View className="mt-4 gap-2">
-        <CardProduct />
-        <Link href={"/screens/(detail)"}>Detalhe</Link>
-      </View>
+      {loading ? (
+        <Text className="text-center text-gray-500">Carregando...</Text>
+      ) : (
+        <FlatList
+          data={products}
+          renderItem={({ item }) => (
+            <View className="mb-4 rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+              <Image source={{ uri: item.image_url }} />
+              <Text>{item.product_name}</Text>
+              {/* <Text>Store: {item.vendors[0]?.name}</Text> */}
+              <Text>Category {item.category}</Text>
+              <Text>Prep Time: {item.prep_time} min</Text>
+              <Text>{item.description}</Text>
+            </View>
+          )}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          className="mt-4"
+        />
+      )}
     </SafeAreaView>
   );
 }

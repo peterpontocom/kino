@@ -27,8 +27,7 @@ export default function ProductDetail() {
           <FontAwesome name="clock-o" size={14} /> 22 min
         </Text>
       </View>
-
-      <Text className="mt-3 text-xl font-medium">Descrição</Text>
+      <Text className="mt-3 text-xl font-medium">Descrição</Text>.
       <Text className="mt-3 text-base text-zinc-500">
         A feijoada é um prato tradicional brasileiro feito com feijão preto,
         diversas carnes suínas e acompanhamentos como arroz, couve, farofa e
