@@ -5,7 +5,7 @@ import { Input } from "@/src/components/ui/input";
 import { useAuth } from "@/src/contexts/auth-context";
 import { supabase } from "@/src/lib/supabase";
 import { Link, router } from "expo-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -117,9 +117,15 @@ export default function Home() {
     fetchProducts();
   }, []);
 
-  // const renderItem = ({ item }: { item: ProductProps }) => (
+  const [searchText, setSearchText] = useState("");
 
-  // );
+  const filteredProducts = useMemo(() => {
+    return products.filter((product) =>
+      product.product_name
+        .toLocaleLowerCase()
+        .includes(searchText.toLocaleLowerCase()),
+    );
+  }, [products, searchText]);
 
   return (
     <SafeAreaView className="flex-1 bg-zinc-50 px-6 py-4">
@@ -130,13 +136,17 @@ export default function Home() {
           {firstName(name || "...")}
         </Text>
       </Text>
-      <Input placeholder="O que vamos comer hoje?" />
+      <Input
+        placeholder="O que vamos comer hoje?"
+        value={searchText}
+        onChangeText={(text) => setSearchText(text)}
+      />
 
       {loading ? (
         <Text className="text-center text-gray-500">Carregando...</Text>
       ) : (
         <FlatList
-          data={products}
+          data={filteredProducts}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => router.push(`/screens/(detail)/${item.id}`)}

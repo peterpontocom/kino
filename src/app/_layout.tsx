@@ -4,6 +4,7 @@ import { router, Stack } from "expo-router";
 import { AuthProvider, useAuth } from "../contexts/auth-context";
 import { useEffect } from "react";
 import { supabase } from "../lib/supabase";
+import { CartProvider } from "../contexts/cart-context";
 
 export default function RootLayout() {
   return (
@@ -30,21 +31,23 @@ function MainLayout() {
     });
   }, []);
   return (
-    <Stack>
-      <Stack.Screen name="index" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="screens/(auth)/signin"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen
-        name="screens/(auth)/signup"
-        options={{ headerShown: false }}
-      />
-      <Stack.Screen name="screens/(main)" options={{ headerShown: false }} />
-      <Stack.Screen
-        name="screens/(detail)/[id]"
-        options={{ headerShown: true, title: "Sobre o producto" }}
-      />
-    </Stack>
+    <CartProvider>
+      <Stack>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="screens/(auth)/signin"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="screens/(auth)/signup"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="screens/(main)" options={{ headerShown: false }} />
+        <Stack.Screen
+          name="screens/(detail)/[id]"
+          options={{ headerShown: true, title: "Sobre o producto" }}
+        />
+      </Stack>
+    </CartProvider>
   );
 }
