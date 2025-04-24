@@ -21,32 +21,26 @@ export function CardProduct({
   variant = "primary",
   handleRemoveFromCart,
 }: CardProductProps) {
-  const { addToCart, cart } = useCart();
+  const { addToCart, cart, increaseQuantity, decreaseQuantity } = useCart();
 
   const handleAddToCart = () => {
-    const isItemInCart = cart.some((item) => item.id === id);
-
-    if (!isItemInCart) {
-      addToCart({
-        id,
-        product_name,
-        prep_time,
-        image_url,
-        price: parseFloat(price),
-      });
-      console.log("Produto adicionado ao carrinho: ", { id, product_name });
-    } else {
-      console.log("Produto já está no carrinho: ", { id, product_name });
-    }
+    addToCart({
+      id,
+      product_name,
+      prep_time,
+      image_url,
+      price: parseFloat(price),
+    });
+    console.log("Produto adicionado ao carrinho: ", { id, product_name });
   };
+
+  const itemInCart = cart.find((item) => item.id === id);
 
   return (
     <View className="mb-4 flex flex-row gap-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-md">
       <View>
         <Image
-          source={{
-            uri: image_url,
-          }}
+          source={{ uri: image_url }}
           style={{ width: 100, height: 100 }}
           resizeMode="cover"
           alt="Imagem do produto"
@@ -77,6 +71,17 @@ export function CardProduct({
             >
               <FontAwesome name="cart-plus" size={20} color={"#fff"} />
             </TouchableOpacity>
+          )}
+          {variant === "secondary" && itemInCart && (
+            <View className="flex-row items-center gap-2">
+              <TouchableOpacity onPress={() => decreaseQuantity(id)}>
+                <FontAwesome name="minus" size={20} />
+              </TouchableOpacity>
+              <Text>{itemInCart.quantity}</Text>
+              <TouchableOpacity onPress={() => increaseQuantity(id)}>
+                <FontAwesome name="plus" size={20} />
+              </TouchableOpacity>
+            </View>
           )}
         </View>
       </View>

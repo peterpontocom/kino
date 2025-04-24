@@ -104,7 +104,7 @@ export default function Home() {
         setProducts([]); // Garante que products não será undefined
       }
 
-      console.log(data);
+      // console.log(data);
     } catch (error) {
       Alert.alert("Erro ao buscar produtos.");
       console.log(error);
