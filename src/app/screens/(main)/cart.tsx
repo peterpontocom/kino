@@ -5,8 +5,15 @@ import { useCart } from "@/src/contexts/cart-context";
 import { supabase } from "@/src/lib/supabase";
 import { FontAwesome } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
-import { FlatList, SafeAreaView, Text, TouchableOpacity } from "react-native";
+import {
+  FlatList,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import * as Location from "expo-location";
+import { useRouter } from "expo-router";
 
 interface UserInfo {
   name: string;
@@ -14,12 +21,14 @@ interface UserInfo {
 }
 
 export default function Cart() {
-  const { cart, removeFromCart } = useCart();
+  const { cart, removeFromCart, setCart } = useCart(); // Adicionamos setCart para limpar o carrinho
   const { user } = useAuth();
+  const router = useRouter();
   const [userInfo, setUserInfo] = useState({ name: "", email: "" } as UserInfo);
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null,
   );
+  const [loading, setLoading] = useState(false);
 
   const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
   const formattedTotal = total.toLocaleString("pt-BR", {
@@ -79,15 +88,82 @@ export default function Cart() {
   }, []);
 
   async function handleFinalizeOrder() {
-    console.log(
-      "Pedido finalizado com os itens: ",
-      "\n\nUser: ",
-      userInfo,
-      "\n\nCart: ",
-      cart,
-      "\n\nLocation: ",
-      JSON.stringify(location ?? "Localização não disponível"),
-    );
+    if (!user?.id) {
+      Alert.alert("Erro", "Você precisa estar logado para finalizar o pedido.");
+      return;
+    }
+    if (cart.length === 0) {
+      Alert.alert("Erro", "O carrinho está vazio.");
+      return;
+    }
+    if (!location) {
+      Alert.alert("Aviso", "Localização não disponível. Deseja continuar?", [
+        { text: "Cancelar" },
+        { text: "Continuar", onPress: handleFinalizeOrder },
+      ]);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // 1. Criar o pedido
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert([
+          {
+            user_id: user.id,
+            status: "pending",
+            total_price: total,
+            latitude: location?.coords.latitude ?? null,
+            longitude: location?.coords.longitude ?? null,
+          },
+        ])
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // 2. Criar os itens do pedido
+      const orderItems = await Promise.all(
+        cart.map(async (item) => {
+          // Buscar o vendor_id do produto
+          const { data: product, error: productError } = await supabase
+            .from("products")
+            .select("vendor_id")
+            .eq("id", item.id)
+            .single();
+
+          if (productError) throw productError;
+
+          return {
+            order_id: order.id,
+            product_id: item.id,
+            vendor_id: product.vendor_id,
+            quantity: item.quantity,
+            unit_price: item.price,
+          };
+        }),
+      );
+
+      const { error: itemsError } = await supabase
+        .from("order_items")
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
+
+      // 3. Limpar o carrinho e redirecionar
+      setCart([]); // Limpa o carrinho
+      Alert.alert("Sucesso", "Pedido finalizado com sucesso!");
+      router.push("../"); // Redireciona para a tela inicial
+    } catch (error) {
+      console.error("Erro ao finalizar pedido: ", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível finalizar o pedido. Tente novamente.",
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -120,7 +196,11 @@ export default function Cart() {
           <Text className="mb-3 mt-4 text-xl font-semibold">
             Total: {formattedTotal}
           </Text>
-          <Button title="Finalizar pedido" onPress={handleFinalizeOrder} />
+          <Button
+            title={loading ? "Finalizando..." : "Finalizar pedido"}
+            onPress={handleFinalizeOrder}
+            disabled={loading}
+          />
         </>
       )}
     </SafeAreaView>

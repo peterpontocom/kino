@@ -6,7 +6,7 @@ interface CartItem {
   prep_time: string;
   image_url: string;
   price: number;
-  quantity: number; // Tornamos quantity obrigatório
+  quantity: number;
 }
 
 interface CartContextProps {
@@ -15,6 +15,7 @@ interface CartContextProps {
   removeFromCart: (id: string) => void;
   increaseQuantity: (id: string) => void;
   decreaseQuantity: (id: string) => void;
+  setCart: (cart: CartItem[]) => void; // Adicionado
 }
 
 const CartContext = createContext<CartContextProps | undefined>(undefined);
@@ -28,14 +29,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     setCart((prevCart) => {
       const existingItem = prevCart.find((cartItem) => cartItem.id === item.id);
       if (existingItem) {
-        // Se o item já existe, incrementa a quantidade
         return prevCart.map((cartItem) =>
           cartItem.id === item.id
             ? { ...cartItem, quantity: cartItem.quantity + 1 }
             : cartItem,
         );
       }
-      // Se não existe, adiciona com quantidade 1
       return [...prevCart, { ...item, quantity: 1 }];
     });
   };
@@ -70,6 +69,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         removeFromCart,
         increaseQuantity,
         decreaseQuantity,
+        setCart,
       }}
     >
       {children}
