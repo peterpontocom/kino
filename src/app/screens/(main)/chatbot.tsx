@@ -4,10 +4,12 @@ import {
   Text,
   FlatList,
   TextInput,
-  Button,
   StyleSheet,
+  SafeAreaView,
 } from "react-native";
 import { sendMessageToGemini } from "./api";
+import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
 
 export interface Message {
   id: string;
@@ -83,14 +85,7 @@ export default function Chatbot() {
     const isUser = item.user.id === 1;
     return (
       <View
-        style={{
-          alignSelf: isUser ? "flex-end" : "flex-start",
-          backgroundColor: isUser ? "#4f46e5" : "#e5e7eb",
-          borderRadius: 10,
-          padding: 10,
-          margin: 5,
-          maxWidth: "80%",
-        }}
+        className={`${isUser ? "justify-end bg-rose-500" : "justify-start bg-zinc-200"} m-2 max-w-[80%] gap-2 rounded-lg p-2`}
       >
         <Text style={{ color: isUser ? "#fff" : "#000" }}>{item.text}</Text>
       </View>
@@ -98,53 +93,23 @@ export default function Chatbot() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView className="w-full flex-1 bg-white p-4">
       <FlatList
         ref={flatListRef}
         data={messages}
         renderItem={renderItem}
         keyExtractor={(item) => item.id}
-        inverted={true}
-        ListHeaderComponent={
-          isLoading ? (
-            <Text style={styles.loadingText}>Digitando...</Text>
-          ) : null
-        }
+        inverted={false}
+        ListHeaderComponent={isLoading ? <Text>Digitando...</Text> : null}
       />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
+      <View className="w-full flex-row items-center justify-center gap-2">
+        <Input
           value={inputText}
           onChangeText={setInputText}
           placeholder="Digite sua pergunta sobre nutrição..."
         />
         <Button title="Enviar" onPress={sendMessage} disabled={isLoading} />
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f0f0f0",
-  },
-  inputContainer: {
-    flexDirection: "row",
-    padding: 10,
-    backgroundColor: "#fff",
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 5,
-    padding: 5,
-    marginRight: 10,
-  },
-  loadingText: {
-    alignSelf: "flex-start",
-    padding: 10,
-    color: "#666",
-  },
-});

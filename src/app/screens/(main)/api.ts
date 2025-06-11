@@ -1,12 +1,13 @@
 import { GoogleGenAI } from "@google/genai";
 import { Message } from "./Chatbot";
+import { GoogleGenAI_API_KEY } from "@/env";
 
 interface GeminiMessage {
   role: "user" | "assistant";
   parts: { text: string }[];
 }
 
-const API_KEY = "AIzaSyDgoRvgLSxkNMYTOYNLJA1HV4N8H8N8gDI";
+const API_KEY = GoogleGenAI_API_KEY;
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
 

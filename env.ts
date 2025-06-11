@@ -8,3 +8,5 @@ export const supabase: SupabaseClient = createClient(
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
 );
+
+export const GoogleGenAI_API_KEY = "AIzaSyDgoRvgLSxkNMYTOYNLJA1HV4N8H8N8gDI"; // Substitua pela sua chave de API do Google GenAI
