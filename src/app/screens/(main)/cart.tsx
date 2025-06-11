@@ -20,11 +20,20 @@ interface UserInfo {
   email: string;
 }
 
+interface CartItem {
+  id: string;
+  product_name: string;
+  price: number;
+  quantity: number;
+  prep_time: number | null;
+  image_url: string | null;
+}
+
 export default function Cart() {
-  const { cart, removeFromCart, setCart } = useCart(); // Adicionamos setCart para limpar o carrinho
+  const { cart, removeFromCart, setCart } = useCart();
   const { user } = useAuth();
   const router = useRouter();
-  const [userInfo, setUserInfo] = useState({ name: "", email: "" } as UserInfo);
+  const [userInfo, setUserInfo] = useState<UserInfo>({ name: "", email: "" });
   const [location, setLocation] = useState<Location.LocationObject | null>(
     null,
   );
@@ -49,20 +58,19 @@ export default function Cart() {
 
     try {
       const { data, error } = await supabase
-        .from("users")
+        .from("user_profiles")
         .select("name, email")
         .eq("id", user.id)
         .single();
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
       if (data) {
         setUserInfo({ name: data.name, email: data.email });
       } else {
-        setUserInfo({} as UserInfo);
+        setUserInfo({ name: "", email: "" });
       }
     } catch (error) {
-      console.log("Erro ao buscar dados do usuário:", error);
+      console.error("Erro ao buscar dados do usuário:", error);
+      Alert.alert("Erro", "Não foi possível carregar os dados do usuário.");
     }
   }
 
@@ -74,14 +82,15 @@ export default function Cart() {
     async function getCurrentLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
-        console.log("Permissão de localização negada");
+        Alert.alert("Erro", "Permissão de localização negada.");
         return;
       }
       try {
         let location = await Location.getCurrentPositionAsync({});
         setLocation(location);
       } catch (error) {
-        console.log("Erro ao obter localização: ", error);
+        console.error("Erro ao obter localização:", error);
+        Alert.alert("Erro", "Não foi possível obter a localização.");
       }
     }
     getCurrentLocation();
@@ -99,11 +108,22 @@ export default function Cart() {
     if (!location) {
       Alert.alert("Aviso", "Localização não disponível. Deseja continuar?", [
         { text: "Cancelar" },
-        { text: "Continuar", onPress: handleFinalizeOrder },
+        {
+          text: "Continuar",
+          onPress: () => handleFinalizeOrderWithoutLocation(),
+        },
       ]);
       return;
     }
 
+    await finalizeOrder(location);
+  }
+
+  async function handleFinalizeOrderWithoutLocation() {
+    await finalizeOrder(null);
+  }
+
+  async function finalizeOrder(location: Location.LocationObject | null) {
     setLoading(true);
     try {
       // 1. Criar o pedido
@@ -111,7 +131,7 @@ export default function Cart() {
         .from("orders")
         .insert([
           {
-            user_id: user.id,
+            user_id: user!.id,
             status: "pending",
             total_price: total,
             latitude: location?.coords.latitude ?? null,
@@ -121,45 +141,59 @@ export default function Cart() {
         .select()
         .single();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("Erro ao criar pedido:", orderError);
+        throw new Error("Erro ao criar o pedido.");
+      }
 
       // 2. Criar os itens do pedido
-      const orderItems = await Promise.all(
-        cart.map(async (item) => {
-          // Buscar o vendor_id do produto
-          const { data: product, error: productError } = await supabase
-            .from("products")
-            .select("vendor_id")
-            .eq("id", item.id)
-            .single();
+      const orderItems: {
+        order_id: string;
+        product_id: string;
+        vendor_id: string;
+        quantity: number;
+        unit_price: number;
+      }[] = [];
 
-          if (productError) throw productError;
+      for (const item of cart) {
+        const { data: product, error: productError } = await supabase
+          .from("products")
+          .select("vendor_id")
+          .eq("id", item.id)
+          .single();
 
-          return {
-            order_id: order.id,
-            product_id: item.id,
-            vendor_id: product.vendor_id,
-            quantity: item.quantity,
-            unit_price: item.price,
-          };
-        }),
-      );
+        if (productError || !product) {
+          console.error("Erro ao buscar produto:", productError);
+          throw new Error(`Produto ${item.product_name} não encontrado.`);
+        }
+
+        orderItems.push({
+          order_id: order.id,
+          product_id: item.id,
+          vendor_id: product.vendor_id,
+          quantity: item.quantity,
+          unit_price: item.price,
+        });
+      }
 
       const { error: itemsError } = await supabase
         .from("order_items")
         .insert(orderItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error("Erro ao criar itens do pedido:", itemsError);
+        throw new Error("Erro ao criar os itens do pedido.");
+      }
 
       // 3. Limpar o carrinho e redirecionar
-      setCart([]); // Limpa o carrinho
+      setCart([]);
       Alert.alert("Sucesso", "Pedido finalizado com sucesso!");
-      router.push("../"); // Redireciona para a tela inicial
-    } catch (error) {
-      console.error("Erro ao finalizar pedido: ", error);
+      router.push("../");
+    } catch (error: any) {
+      console.error("Erro ao finalizar pedido:", error);
       Alert.alert(
         "Erro",
-        "Não foi possível finalizar o pedido. Tente novamente.",
+        error.message || "Não foi possível finalizar o pedido.",
       );
     } finally {
       setLoading(false);
