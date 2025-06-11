@@ -10,6 +10,7 @@ import {
 import { sendMessageToGemini } from "./api";
 import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
+import { FontAwesome } from "@expo/vector-icons";
 
 export interface Message {
   id: string;
@@ -31,7 +32,7 @@ export default function Chatbot() {
   useEffect(() => {
     const initialMessage: Message = {
       id: "1",
-      text: "Olá! Sou seu chatbot nutricionista. Como posso ajudar você com suas perguntas sobre dieta?",
+      text: "Olá! Sou sua a Nela. sua nutricionista. Como posso ajudar você hoje?",
       createdAt: new Date(),
       user: { id: 2, name: "Nutricionista Bot" },
     };
@@ -85,9 +86,21 @@ export default function Chatbot() {
     const isUser = item.user.id === 1;
     return (
       <View
-        className={`${isUser ? "justify-end bg-rose-500" : "justify-start bg-zinc-200"} m-2 max-w-[80%] gap-2 rounded-lg p-2`}
+        className={`${isUser ? "self-end bg-rose-500" : "self-start bg-zinc-200"} my-2 w-max min-w-[15%] max-w-[80%] gap-2 rounded-lg p-2`}
       >
-        <Text style={{ color: isUser ? "#fff" : "#000" }}>{item.text}</Text>
+        <View className="">
+          <Text
+            style={{ color: isUser ? "#fff" : "#000" }}
+            className="leading-6"
+          >
+            {item.text}
+          </Text>
+          <FontAwesome
+            name="check"
+            color={`${isUser ? "#e01234c5" : "#0000006a"}`}
+            className="mt-2 size-5 self-end"
+          />
+        </View>
       </View>
     );
   };
@@ -103,11 +116,20 @@ export default function Chatbot() {
         ListHeaderComponent={isLoading ? <Text>Digitando...</Text> : null}
       />
       <View className="w-full flex-row items-center justify-center gap-2">
-        <Input
-          value={inputText}
-          onChangeText={setInputText}
-          placeholder="Digite sua pergunta sobre nutrição..."
-        />
+        <View className="flex-1 rounded-lg border border-zinc-300 bg-white px-3 py-1">
+          <TextInput
+            value={inputText}
+            onChangeText={setInputText}
+            onKeyPress={(e) => {
+              if (e.nativeEvent.key === "Enter") {
+                e.preventDefault();
+                sendMessage();
+              }
+            }}
+            placeholder="Digite sua pergunta sobre nutrição..."
+          />
+        </View>
+
         <Button title="Enviar" onPress={sendMessage} disabled={isLoading} />
       </View>
     </SafeAreaView>

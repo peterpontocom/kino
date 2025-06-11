@@ -29,9 +29,9 @@ export default function TabLayout() {
         name="chatbot"
         options={{
           headerShown: false,
-          title: "Chatbot",
+          title: "Nela",
           tabBarIcon: ({ color }) => (
-            <FontAwesome name="commenting" size={24} color={color} />
+            <FontAwesome name="comments" size={24} color={color} />
           ),
         }}
       />
