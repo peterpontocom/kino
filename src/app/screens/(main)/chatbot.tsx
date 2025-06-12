@@ -86,7 +86,7 @@ export default function Chatbot() {
     const isUser = item.user.id === 1;
     return (
       <View
-        className={`${isUser ? "self-end bg-rose-500" : "self-start bg-zinc-200"} my-2 w-max min-w-[15%] max-w-[80%] gap-2 rounded-lg p-2`}
+        className={`${isUser ? "self-end bg-rose-500" : "self-start bg-zinc-200"} my-2 w-max min-w-[15%] max-w-[80%] gap-2 rounded-lg p-2 mt-10`}
       >
         <View className="">
           <Text
